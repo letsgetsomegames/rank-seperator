@@ -9,6 +9,7 @@ const runBtn = document.getElementById("run");
 const note = document.getElementById("note");
 
 let workbook = null;
+let xlsxReady = false;
 
 function setNote(msg) {
   note.textContent = msg || "";
@@ -200,19 +201,57 @@ function fillSelects(names) {
   }
 }
 
+function ensureXlsxLoaded(cb) {
+  if (window.XLSX) {
+    xlsxReady = true;
+    cb();
+    return;
+  }
+
+  if (xlsxReady === "loading") {
+    const wait = setInterval(() => {
+      if (window.XLSX) {
+        clearInterval(wait);
+        xlsxReady = true;
+        cb();
+      }
+    }, 100);
+    return;
+  }
+
+  xlsxReady = "loading";
+  const script = document.createElement("script");
+  script.src = "https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js";
+  script.onload = () => {
+    xlsxReady = true;
+    cb();
+  };
+  script.onerror = () => {
+    xlsxReady = false;
+    setNote("Failed to load XLSX library. Check your connection or ad blocker.");
+  };
+  document.head.appendChild(script);
+}
+
 function loadFile(file) {
   if (!file || !file.name.toLowerCase().endsWith(".xlsx")) {
     setNote("Please select a .xlsx file.");
     return;
   }
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const data = new Uint8Array(e.target.result);
-    workbook = XLSX.read(data, { type: "array" });
-    fillSelects(workbook.SheetNames);
-    setNote(`Loaded ${file.name}`);
-  };
-  reader.readAsArrayBuffer(file);
+  ensureXlsxLoaded(() => {
+    if (!window.XLSX) {
+      setNote("XLSX library is not available.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      workbook = XLSX.read(data, { type: "array" });
+      fillSelects(workbook.SheetNames);
+      setNote(`Loaded ${file.name}`);
+    };
+    reader.readAsArrayBuffer(file);
+  });
 }
 
 fileInput.addEventListener("change", (e) => loadFile(e.target.files[0]));
