@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VEX Rankings Separator</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.20.2/dist/xlsx.full.min.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <div class="badge">VEX Rankings Separator</div>
+        <h1>Split cumulative rankings into the latest competition only.</h1>
+        <p>
+          Upload the combined rankings spreadsheet, pick the newer and older sheets, and download a
+          clean file for just the newest event.
+        </p>
+      </header>
+
+      <section class="card">
+        <div class="row">
+          <div class="drop" id="drop">
+            <input type="file" id="file" accept=".xlsx" />
+            <div class="drop-inner">
+              <div class="drop-title">Drop your .xlsx here</div>
+              <div class="drop-sub">or click to browse</div>
+            </div>
+          </div>
+          <div class="meta">
+            <div class="field">
+              <label for="newer">Newer Sheet</label>
+              <select id="newer" disabled></select>
+            </div>
+            <div class="field">
+              <label for="older">Older Sheet</label>
+              <select id="older" disabled></select>
+            </div>
+            <label class="check">
+              <input type="checkbox" id="rerank" />
+              Re-rank by Win %, then Autonomous Points, then Strength Points
+            </label>
+            <button id="run" disabled>Create Output</button>
+            <div class="note" id="note"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card subtle">
+        <h2>What it does</h2>
+        <ul>
+          <li>Keeps team name + team number from the newer sheet</li>
+          <li>Subtracts older stats for columns starting at D</li>
+          <li>Recalculates Win %, Average Points, High Score</li>
+        </ul>
+      </section>
+    </div>
+  </body>
+</html>
